@@ -37,6 +37,7 @@ const (
 // bootstrapTemplateData is the data to use to replace values in bootstrap
 // template files.
 type bootstrapTemplateData struct {
+	AdditionalTrustBundle string
 	EtcdCluster  string
 	PullSecret   string
 	ReleaseImage string
@@ -180,6 +181,7 @@ func (a *Bootstrap) getTemplateData(installConfig *types.InstallConfig) (*bootst
 	}
 
 	return &bootstrapTemplateData{
+		AdditionalTrustBundle: installConfig.AdditionalTrustBundle,
 		PullSecret:   installConfig.PullSecret,
 		ReleaseImage: releaseImage,
 		EtcdCluster:  strings.Join(etcdEndpoints, ","),

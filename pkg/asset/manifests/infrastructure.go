@@ -43,6 +43,7 @@ func (*Infrastructure) Dependencies() []asset.Asset {
 		&installconfig.ClusterID{},
 		&installconfig.InstallConfig{},
 		&CloudProviderConfig{},
+		&AdditionalTrustBundleConfig{},
 	}
 }
 
@@ -51,7 +52,8 @@ func (i *Infrastructure) Generate(dependencies asset.Parents) error {
 	clusterID := &installconfig.ClusterID{}
 	installConfig := &installconfig.InstallConfig{}
 	cloudproviderconfig := &CloudProviderConfig{}
-	dependencies.Get(clusterID, installConfig, cloudproviderconfig)
+	trustbundleconfig := &AdditionalTrustBundleConfig{}
+	dependencies.Get(clusterID, installConfig, cloudproviderconfig, trustbundleconfig)
 
 	var platform configv1.PlatformType
 	switch installConfig.Config.Platform.Name() {
@@ -93,6 +95,10 @@ func (i *Infrastructure) Generate(dependencies asset.Parents) error {
 		// set the configmap reference.
 		config.Spec.CloudConfig = configv1.ConfigMapFileReference{Name: cloudproviderconfig.ConfigMap.Name, Key: cloudProviderConfigDataKey}
 		i.FileList = append(i.FileList, cloudproviderconfig.File)
+	}
+
+	if trustbundleconfig.ConfigMap != nil {
+		i.FileList = append(i.FileList, trustbundleconfig.Files()...)
 	}
 
 	configData, err := yaml.Marshal(config)
